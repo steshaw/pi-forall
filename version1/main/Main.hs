@@ -21,8 +21,8 @@ import Text.ParserCombinators.Parsec.Error
 
 import Control.Monad.Except
 
-import System.Environment(getArgs)
-import System.Exit (exitFailure,exitSuccess)
+import System.Environment (getArgs)
+import System.Exit (exitFailure, exitSuccess)
 import System.FilePath (splitFileName)
 
 exitWith :: Either a b -> (a -> IO ()) -> IO b
