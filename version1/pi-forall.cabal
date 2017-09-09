@@ -13,7 +13,6 @@ Category: Compilers/Interpreters
 Homepage: https://github.com/sweirich/pi-forall
 Synopsis: Demo implementation of typechecker for dependently-typed language
 
-                    
 library
   hs-source-dirs: src/
   Exposed-modules: Syntax
@@ -24,7 +23,6 @@ library
                    PrettyPrint
                    Equal
                    LayoutToken
-                   Main
   Build-depends:  base >= 4 && < 5,
                   parsec >= 3.1.8 && < 3.2,
                   mtl >= 2.2.1,
@@ -37,8 +35,7 @@ library
                   filepath,
                   HUnit,
                   QuickCheck
-                  
-                  
+
 executable pi-forall
   hs-source-dirs: src/
   Main-is: Main.hs
@@ -63,6 +60,3 @@ executable pi-forall
                  PrettyPrint
                  Syntax
                  TypeCheck
-
-  
-
