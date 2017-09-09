@@ -24,34 +24,27 @@ library
                    PrettyPrint
                    Syntax
                    TypeCheck
-  build-depends:  base >= 4 && < 5,
-                  parsec >= 3.1.8 && < 3.2,
-                  mtl >= 2.2.1,
-                  pretty >= 1.0.1.0,
-                  unbound-generics >= 0.2,
-                  transformers,
-                  array >= 0.3.0.2 && < 0.6,
-                  containers,
-                  directory,
-                  filepath,
-                  HUnit,
-                  QuickCheck
+  build-depends:  base >= 4 && < 5
+               ,  parsec >= 3.1.8 && < 3.2
+               ,  mtl >= 2.2.1
+               ,  pretty >= 1.0.1.0
+               ,  unbound-generics >= 0.2
+               ,  transformers
+               ,  array >= 0.3.0.2 && < 0.6
+               ,  containers
+               ,  directory
+               ,  filepath
+               ,  HUnit
+               ,  QuickCheck
   ghc-options:  -Wall -fwarn-tabs
 
 executable pi-forall
   hs-source-dirs: main/
   main-is: Main.hs
-  build-depends: base >=4 && < 5,
-                 pi-forall,
-                 parsec >= 3.1.8 && < 3.2,
-                 mtl >= 2.2.1,
-                 pretty >= 1.0.1.0,
-                 unbound-generics >= 0.2,
-                 transformers,
-                 array >= 0.3.0.2 && < 0.6,
-                 containers,
-                 directory,
-                 filepath,
-                 HUnit,
-                 QuickCheck
+  build-depends: base >=4 && < 5
+               , pi-forall
+               , parsec >= 3.1.8 && < 3.2
+               , mtl >= 2.2.1
+               , pretty >= 1.0.1.0
+               , filepath
   ghc-options:  -Wall -fwarn-tabs
