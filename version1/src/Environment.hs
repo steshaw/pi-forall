@@ -1,7 +1,7 @@
 {- OPLSS -}
 
 {-# LANGUAGE GADTs, NamedFieldPuns, FlexibleContexts, ViewPatterns, RankNTypes, CPP #-}
-{-# OPTIONS_GHC -Wall -fno-warn-unused-matches #-}
+-- {-# OPTIONS_GHC -Wall -fno-warn-unused-matches #-}
 
 -- | Utilities for managing a typechecking context.
 module Environment

@@ -1,7 +1,8 @@
 {- PiForall language, OPLSS -}
 
 {-# LANGUAGE PatternGuards, FlexibleInstances, FlexibleContexts, TupleSections, ExplicitForAll, CPP #-}
-{-# OPTIONS_GHC -Wall -fno-warn-unused-matches -fno-warn-orphans #-}
+-- {-# OPTIONS_GHC -Wall -fno-warn-unused-matches -fno-warn-orphans #-}
+{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
 
 -- | A parsec-based parser for the concrete syntax.
 module Parser
