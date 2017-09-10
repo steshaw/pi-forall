@@ -29,18 +29,18 @@
 {-# OPTIONS_GHC -fno-warn-unused-matches #-}
 
 module LayoutToken
-    ( LanguageDef
-    , GenLanguageDef (..)
-    , TokenParser
-    , GenTokenParser (..)
-    , makeTokenParser
-    , LayoutFun (..)
-    ) where
+  ( LanguageDef
+  , GenLanguageDef(..)
+  , TokenParser
+  , GenTokenParser(..)
+  , makeTokenParser
+  , LayoutFun(..)
+  ) where
 
-import Data.Char ( isAlpha, toLower, toUpper, isSpace, digitToInt )
-import Data.List ( nub, sort )
+import Data.Char (digitToInt, isAlpha, isSpace, toLower, toUpper)
+import Data.List (nub, sort)
 import Control.Monad.Identity
-import Text.Parsec (Column,sourceColumn, setSourceColumn)
+import Text.Parsec (Column, setSourceColumn, sourceColumn)
 import Text.Parsec.Prim
 import Text.Parsec.Char
 import Text.Parsec.Combinator

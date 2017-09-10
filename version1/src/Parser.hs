@@ -1,18 +1,15 @@
 {- PiForall language, OPLSS -}
 
-{-# LANGUAGE PatternGuards, FlexibleInstances, FlexibleContexts, TupleSections, ExplicitForAll, CPP #-}
+{-# LANGUAGE PatternGuards, FlexibleInstances, FlexibleContexts, TupleSections, ExplicitForAll #-}
 -- {-# OPTIONS_GHC -Wall -fno-warn-unused-matches -fno-warn-orphans #-}
 {-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
 
 -- | A parsec-based parser for the concrete syntax.
 module Parser
-  (
-   parseModuleFile, 
-   parseModuleImports,
-   parseExpr
-  )
-  where
-
+  ( parseModuleFile
+  , parseModuleImports
+  , parseExpr
+  ) where
 
 import Syntax hiding (moduleImports)
 
@@ -24,33 +21,14 @@ import qualified LayoutToken as Token
 
 import Control.Monad.State.Lazy hiding (join)
 
-
-#ifdef MIN_VERSION_GLASGOW_HASKELL
-#if MIN_VERSION_GLASGOW_HASKELL(7,10,3,0)
--- ghc >= 7.10.3
-#else
--- older ghc versions, but MIN_VERSION_GLASGOW_HASKELL defined
-#endif
-#else
--- MIN_VERSION_GLASGOW_HASKELL not even defined yet (ghc <= 7.8.x)
-import Control.Applicative ( (<$>), (<*>))
-#endif
-
-
-
-
-
 import Control.Monad.Except hiding (join)
-
-
-
 
 import Data.List
 -- import qualified Data.Set as S
 
-{- 
+{-
 
-Concrete syntax for the language: 
+Concrete syntax for the language:
 Optional components in this BNF are marked with < >
 
   terms:
@@ -63,7 +41,7 @@ Optional components in this BNF are marked with < >
 
     | (a : A)                  Annotations
     | (a)                      Parens
-    | TRUSTME                  An axiom 'TRUSTME', inhabits all types 
+    | TRUSTME                  An axiom 'TRUSTME', inhabits all types
 
     | let x = a in b           Let expression
 
@@ -72,7 +50,7 @@ Optional components in this BNF are marked with < >
 
     | Bool                     Boolean type
     | True | False             Boolean values
-    | if a then b else c       If 
+    | if a then b else c       If
 
     | { x : A | B }            Dependent pair type
     | (a, b)                   Prod introduction
@@ -107,20 +85,20 @@ parseModuleFile :: (MonadError ParseError m, MonadIO m) => String -> m Module
 parseModuleFile name = do
   liftIO $ putStrLn $ "Parsing File " ++ show name
   contents <- liftIO $ readFile name
-  liftError $ runFreshM $ 
+  liftError $ runFreshM $
      (runParserT (do { whiteSpace; v <- moduleDef;eof; return v}) [] name contents)
 
 -- | Parse only the imports part of a module from the given filepath.
 parseModuleImports :: (MonadError ParseError m, MonadIO m) => String -> m Module
 parseModuleImports name = do
   contents <- liftIO $ readFile name
-  liftError $ runFreshM $ 
+  liftError $ runFreshM $
 
      (runParserT (do { whiteSpace; moduleImports }) [] name contents)
 
 -- | Test an 'LParser' on a String.
 testParser :: (LParser t) -> String -> Either ParseError t
-testParser parser str = runFreshM $ 
+testParser parser str = runFreshM $
 
      runParserT (do { whiteSpace; v <- parser; eof; return v}) [] "<interactive>" str
 
@@ -133,7 +111,7 @@ type LParser a = ParsecT
                     String                      -- The input is a sequence of Char
                     [Column] (                  -- The internal state for Layout tabs
 
-                       FreshM)                  -- The internal state for generating fresh names, 
+                       FreshM)                  -- The internal state for generating fresh names,
                     a                           -- the type of the object being parsed
 
 instance Fresh (ParsecT s u FreshM)  where
@@ -168,18 +146,19 @@ trellysStyle = Token.LanguageDef
                   ,"axiom"
                   ,"erased"
                   ,"TRUSTME"
-                  ,"ord" 
+                  ,"ord"
                   , "pcase"
-                  , "Bool", "True", "False" 
+                  , "Bool", "True", "False"
                   ,"if","then","else"
-                  , "One", "tt"                               
+                  , "One", "tt"
                   ]
                , Token.reservedOpNames =
                  ["!","?","\\",":",".",",","<", "=", "+", "-", "^", "()", "_","|","{", "}"]
                 }
+
 tokenizer :: Token.GenTokenParser String [Column] (FreshM)
 layout :: forall a t. LParser a -> LParser t -> LParser [a]
-(tokenizer, layout) = 
+(tokenizer, layout) =
   let (t, Token.LayFun l) = Token.makeTokenParser trellysStyle "{" ";" "}"
       in (t, l)
 
@@ -191,9 +170,9 @@ whiteSpace = Token.whiteSpace tokenizer
 
 variable :: LParser TName
 variable =
-  do i <- identifier 
+  do i <- identifier
      return $ string2Name i
-     
+
 
 
 
@@ -202,7 +181,7 @@ colon, dot, comma :: LParser ()
 colon = Token.colon tokenizer >> return ()
 dot = Token.dot tokenizer >> return ()
 comma = Token.comma tokenizer >> return ()
-  
+
 reserved,reservedOp :: String -> LParser ()
 reserved = Token.reserved tokenizer
 reservedOp = Token.reservedOp tokenizer
@@ -220,7 +199,7 @@ moduleImports = do
   modName <- identifier
   reserved "where"
   imports <- layout importDef (return ())
-  return $ Module modName imports [] 
+  return $ Module modName imports []
 
 moduleDef :: LParser Module
 moduleDef = do
@@ -230,27 +209,27 @@ moduleDef = do
   imports <- layout importDef (return ())
   decls <- layout decl (return ())
 
-  return $ Module modName imports decls 
+  return $ Module modName imports decls
 
 importDef :: LParser ModuleImport
 importDef = do reserved "import" >>  (ModuleImport <$> importName)
   where importName = identifier
 
 
-    
+
 ---
 --- Top level declarations
 ---
 
 decl,sigDef,valDef :: LParser Decl
-decl =  sigDef <|> valDef 
+decl =  sigDef <|> valDef
 
 
-  
+
 sigDef = do
   n <- try (variable >>= \v -> colon >> return v)
   ty <- expr
-  return $ Sig n ty 
+  return $ Sig n ty
 
 valDef = do
   n <- try (do {n <- variable; reservedOp "="; return n})
@@ -265,15 +244,15 @@ valDef = do
 ------------------------
 
 trustme :: LParser Term
-trustme = do reserved "TRUSTME" 
+trustme = do reserved "TRUSTME"
              return (TrustMe (Annot Nothing))
 
 
-     
+
 -- Expressions
 
 expr,term,factor :: LParser Term
- 
+
 -- expr is the toplevel expression grammar
 expr = do
     p <- getPosition
@@ -281,14 +260,14 @@ expr = do
   where table = [
 
                  [ifixM AssocRight "->" mkArrow]
-                ]   
+                ]
 
         ifixM assoc op f = Infix (reservedOp op >> f) assoc
-        mkArrow  = 
+        mkArrow  =
           do n <- fresh wildcardName
-             return $ \tyA tyB -> 
+             return $ \tyA tyB ->
                Pi (bind (n,embed tyA) tyB)
-               
+
 -- A "term" is either a function application or a constructor
 -- application.  Breaking it out as a seperate category both
 -- eliminates left-recursion in (<expr> := <expr> <expr>) and
@@ -296,26 +275,26 @@ expr = do
 term =  funapp
 
 
-  
+
 funapp :: LParser Term
-funapp = do 
+funapp = do
   f <- factor
   foldl' app f <$> many bfactor
   where
-        bfactor = factor 
+        bfactor = factor
         app = App
 
-factor = choice [ Var <$> variable <?> "a variable"                
+factor = choice [ Var <$> variable <?> "a variable"
                 , typen      <?> "Type"
                 , lambda     <?> "a lambda"
                 , letExpr    <?> "a let"
-                  
-                  
+
+
                 , trustme    <?> "TRUSTME"
-                  
-                , bconst     <?> "a constant"  
-                , ifExpr     <?> "an if expression" 
-                , sigmaTy    <?> "a sigma type"  
+
+                , bconst     <?> "a constant"
+                , ifExpr     <?> "an if expression"
+                , sigmaTy    <?> "a sigma type"
                 , pcaseExpr  <?> "a pcase"
                 , expProdOrAnnotOrParens
                     <?> "an explicit function type or annotated expression"
@@ -330,18 +309,18 @@ typen =
 
 
 
-  -- Lambda abstractions have the syntax '\x . e' 
+  -- Lambda abstractions have the syntax '\x . e'
 lambda :: LParser Term
 lambda = do reservedOp "\\"
             binds <- many1 variable
             dot
             body <- expr
-            return $ foldr lam body binds 
+            return $ foldr lam body binds
   where
 
-    
+
      lam x m = Lam (bind (x, embed $ Annot Nothing) m)
-                            
+
 
 
 bconst  :: LParser Term
@@ -352,7 +331,7 @@ bconst = choice [reserved "Bool"  >> return TyBool,
                  reserved "tt"    >> return LitUnit]
 
 ifExpr :: LParser Term
-ifExpr = 
+ifExpr =
   do reserved "if"
      a <- expr
      reserved "then"
@@ -366,7 +345,7 @@ ifExpr =
      return $ (Case a [tm, fm] (Annot Nothing))
      -}
 
--- 
+--
 letExpr :: LParser Term
 letExpr =
   do reserved "let"
@@ -418,8 +397,6 @@ expProdOrAnnotOrParens =
          Comma a b -> return $ Prod a b (Annot Nothing)
          Nope a    -> return $ Paren a
 
-    
-    
 pcaseExpr :: LParser Term
 pcaseExpr = do
     reserved "pcase"
@@ -434,9 +411,7 @@ pcaseExpr = do
     a <- expr
     return $ Pcase scrut (bind (x,y) a) (Annot Nothing)
 
-
-
-sigmaTy :: LParser Term 
+sigmaTy :: LParser Term
 sigmaTy = do
   reservedOp "{"
   x <- variable
@@ -446,5 +421,3 @@ sigmaTy = do
   b <- expr
   reservedOp "}"
   return (Sigma (bind (x, embed a) b))
-  
-  

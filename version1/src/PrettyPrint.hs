@@ -1,9 +1,11 @@
 {- PiForall language, OPLSS -}
 
-{-# LANGUAGE TypeSynonymInstances,ExistentialQuantification,FlexibleInstances, UndecidableInstances, ViewPatterns, DefaultSignatures, GeneralizedNewtypeDeriving, FlexibleContexts, CPP #-}
+{-# LANGUAGE TypeSynonymInstances, ExistentialQuantification,
+  FlexibleInstances, UndecidableInstances, ViewPatterns,
+  DefaultSignatures, GeneralizedNewtypeDeriving, FlexibleContexts #-}
 {-# OPTIONS_GHC -Wall -fno-warn-unused-matches -fno-warn-name-shadowing #-}
 
--- | A Pretty Printer. 
+-- | A Pretty Printer.
 module PrettyPrint(Disp(..), D(..))  where
 
 import Data.Typeable (Typeable)
@@ -18,29 +20,12 @@ import Text.PrettyPrint as PP
 import Text.ParserCombinators.Parsec.Pos (SourcePos, sourceName, sourceLine, sourceColumn)
 import Text.ParserCombinators.Parsec.Error (ParseError)
 
-
-#ifdef MIN_VERSION_GLASGOW_HASKELL
-#if MIN_VERSION_GLASGOW_HASKELL(7,10,3,0)
--- ghc >= 7.10.3
-#else
--- older ghc versions, but MIN_VERSION_GLASGOW_HASKELL defined
-#endif
-#else
--- MIN_VERSION_GLASGOW_HASKELL not even defined yet (ghc <= 7.8.x)
-import Control.Applicative (Applicative(..), (<$>), (<*>))
-#endif
-
-
-
-
-
-
 import qualified Data.Set as S
 
 -- | The 'Disp' class governs types which can be turned into 'Doc's
 class Disp d where
   disp :: d -> Doc
-  
+
   default disp :: (Display d) => d -> Doc
   disp = cleverDisp
 
@@ -53,8 +38,8 @@ cleverDisp d =
   runReaderDispInfo (display d) initDI
 
 
-instance Disp Term 
-instance Typeable a => Disp (Name a) 
+instance Disp Term
+instance Typeable a => Disp (Name a)
 
 
 instance Disp String where
@@ -90,7 +75,7 @@ data D = DS String -- ^ String literal
 
 instance Disp D where
   disp (DS s) = text s
-  disp (DD d) = nest 2 $ disp d 
+  disp (DD d) = nest 2 $ disp d
                 -- might be a hack to do the nesting here???
 
 instance Disp [D] where
@@ -111,7 +96,7 @@ instance Disp ModuleImport where
 
 instance Disp [Decl] where
   disp = vcat . map disp
-  
+
 instance Disp Decl where
 
   disp (Def n term) = disp n <+> text "=" <+> disp term
@@ -127,10 +112,10 @@ instance Disp Decl where
 -- The Display class
 -------------------------------------------------------------------------
 -- | The data structure for information about the display
--- 
+--
 data DispInfo = DI
   {
-  showAnnots :: Bool,         -- ^ should we show the annotations?  
+  showAnnots :: Bool,         -- ^ should we show the annotations?
   dispAvoid  :: S.Set AnyName   -- ^ names that have been used
   }
 
@@ -143,7 +128,7 @@ instance LFresh (ReaderDispInfo) where
                       (map (makeName s) [0..]))
   getAvoids = dispAvoid <$> ask
   avoid names = local upd where
-     upd di = di { dispAvoid = 
+     upd di = di { dispAvoid =
                       (S.fromList names) `S.union` (dispAvoid di) }
 
 -- | An empty 'DispInfo' context
@@ -166,7 +151,7 @@ type M a = ReaderDispInfo a
 class (Alpha t) => Display t where
   -- | Convert a value to a 'Doc'.
   display  :: t -> M Doc
-  
+
 instance Display String where
   display = return . text
 instance Display Int where
@@ -200,7 +185,7 @@ wrapf f = case f of
 
 -- deciding whether to add parens to the arg of an application
 wraparg :: Term -> Doc -> Doc
-wraparg x = case x of 
+wraparg x = case x of
   Var _       -> id
   Type        -> id
   TyUnit      -> id
@@ -208,7 +193,7 @@ wraparg x = case x of
   TyBool      -> id
   LitBool b   -> id
   Sigma _     -> id
-  TrustMe _   -> id      
+  TrustMe _   -> id
 
 
   Pos _ a     -> wraparg a
@@ -218,19 +203,19 @@ instance Display Annot where
   display (Annot Nothing)  = return $ empty
   display (Annot (Just x)) = do
     st <- ask
-    if (showAnnots st) then 
+    if (showAnnots st) then
          (text ":" <+>) <$> (display x)
       else return $ empty
 
 
- 
+
 
 
 instance Display Term where
   display (Var n) = display n
 
 
-    
+
   display (Type) = return $ text "Type"
 
   display a@(Lam b) = do
@@ -240,7 +225,7 @@ instance Display Term where
   display (App f x) = do
      df <- display f
      dx <- display x
-     return $ wrapf f df <+> wraparg x dx             
+     return $ wrapf f df <+> wraparg x dx
 
   display (Pi bnd) = do
      lunbind bnd $ \((n,a), b) -> do
@@ -249,10 +234,10 @@ instance Display Term where
         db <- display b
         let lhs = if (n `elem` toListOf fv b) then
                 parens (dn <+> colon <+> da)
-              else 
+              else
                 wraparg (unembed a) da
         return $ lhs <+> text "->" <+> db
-  
+
   display (Paren e) = do
      de <- display e
      return $ (parens de)
@@ -270,38 +255,38 @@ instance Display Term where
                     <+> text "in",
                     db]
 
-         
-     
-     
-     
-     
-     
-     
+
+
+
+
+
+
+
   display (Ann a b)    = do
     da <- display a
     db <- display b
     return $ parens (da <+> text ":" <+> db)
 
   display (TrustMe ma)  = do
-    da <- display ma 
+    da <- display ma
     return $ text "TRUSTME" <+> da
-    
-  display (Sigma bnd) = 
+
+  display (Sigma bnd) =
     lunbind bnd $ \ ((x,unembed->tyA),tyB) -> do
       dx <- display x
       dA <- display tyA
       dB <- display tyB
-      return $ text "{" <+> dx <+> text ":" <+> dA 
+      return $ text "{" <+> dx <+> text ":" <+> dA
         <+> text "|" <+> dB <+> text "}"
   display (Prod a b ann) = do
     da <- display a
     db <- display b
-    dann <- display ann 
+    dann <- display ann
     return $ parens (da <+> text "," <+> db) <+> dann
-    
+
   display (Pcase a bnd ann) = do
-    da <- display a 
-    dann <- display ann 
+    da <- display a
+    dann <- display ann
     lunbind bnd $ \ ((x,y), body) -> do
       dx <- display x
       dy <- display y
@@ -309,24 +294,24 @@ instance Display Term where
       return $ text "pcase" <+> da <+> text "of"
         <+> text "(" <+> dx <+> text "," <+> dy <+> text ")"
         <+> text "->" <+> dbody <+> dann
-    
-  display (TyBool) = return $ text "Bool"  
+
+  display (TyBool) = return $ text "Bool"
   display (LitBool b) = return $ if b then text "True" else text "False"
   display (If a b c ann) = do
     da <- display a
     db <- display b
     dc <- display c
-    dann <- display ann    
+    dann <- display ann
     return $ text "if" <+> da <+> text "then" <+> db
                 <+> text "else" <+> dc <+> dann
-    
-  display (TyUnit) = return $ text "One"  
-  display (LitUnit) = return $ text "tt"
-  
 
-      
+  display (TyUnit) = return $ text "One"
+  display (LitUnit) = return $ text "tt"
+
+
+
 gatherBinders :: Term -> M ([Doc], Doc)
-gatherBinders (Lam b) = 
+gatherBinders (Lam b) =
    lunbind b $ \((n,unembed->ma), body) -> do
       dn <- display n
       dt <- display ma
@@ -334,7 +319,7 @@ gatherBinders (Lam b) =
       (rest, body) <- gatherBinders body
       return $ (db : rest, body)
 
-gatherBinders body = do 
+gatherBinders body = do
   db <- display body
   return ([], db)
 
@@ -350,4 +335,3 @@ instance Disp [(Name Term,Term)] where
 
 instance Disp (TName,Term) where
   disp (n,t) = parens $ (disp n) <> comma <+> disp t
-
