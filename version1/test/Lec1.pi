@@ -1,2 +1,44 @@
 module Lec1 where
 
+id : (x : Type) -> (y : x) -> x
+id = \x y. y
+
+idid : ((x : Type) -> (y : x) -> x)
+idid = id ((x : Type) -> (y : x) -> x) id
+
+-----------------------------------------------------------------------
+-- Church booleans
+
+bool : Type
+bool = (x : Type) -> x -> x -> x
+
+true : bool
+true = \x . \y. \z. y
+
+false : bool
+false = \x. \y. \z. z
+
+cond : bool -> (x : Type) -> x -> x -> x
+-- cond = \b. b
+cond = TRUSTME
+
+-----------------------------------------------------------------------
+-- logical and (i.e. product types)
+
+and : Type -> Type -> Type
+and = \p. \q. (r : Type) -> (p -> q -> r) -> r
+
+conj : (p : Type) -> (q : Type) -> p -> q -> and p q
+conj = \p. \q. \a. \b. \r. \f. f a b
+
+proj1 : (p : Type) -> (q : Type) -> and p q -> p
+proj1 = \p. \q. \andpq. andpq p (\a. \b. a)
+
+proj2 : (p : Type) -> (q : Type) -> and p q -> q
+proj2 = \p. \q. \andpq. andpq q (\a. \b. b)
+
+{-
+and_commutes1 : (p : Type) -> (q : Type) -> and p q -> and q p
+-- and_commutes1 = \p. \q. \andpq. conj q p (proj2 p q andpq) (proj1 p q andpq)
+and_commutes1 = \p. \q. \andpq. conj q p TRUSTME TRUSTME
+-}
