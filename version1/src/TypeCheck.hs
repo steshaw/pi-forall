@@ -28,13 +28,14 @@ import Equal
 import Unbound.Generics.LocallyNameless
 import Unbound.Generics.LocallyNameless.Internal.Fold (toListOf)
 
+import Control.Monad
 import Control.Monad.Except
 import Text.PrettyPrint.HughesPJ
 import Data.Maybe
 
 -- | Infer the type of a term, producing an annotated version of the
 -- term (whose type can *always* be inferred).
-inferType :: Term -> TcMonad (Term,Type)
+inferType :: Term -> TcMonad (Term, Type)
 inferType t = tcTerm t Nothing
 
 -- | Check that the given term has the expected type.
@@ -49,7 +50,7 @@ checkType tm expectedTy = do
 -- where all of the type annotations have been filled in
 -- The second argument is 'Nothing' in inference mode and
 -- an expected type (must be in whnf) in checking mode
-tcTerm :: Term -> Maybe Type -> TcMonad (Term,Type)
+tcTerm :: Term -> Maybe Type -> TcMonad (Term, Type)
 
 tcTerm t@(Var x) Nothing = do
   ty <- lookupTy x
@@ -115,11 +116,16 @@ tcTerm (TyUnit) Nothing = pure (TyUnit, Type)
 
 tcTerm (LitUnit) Nothing = pure (LitUnit, TyUnit)
 
-tcTerm (TyBool) Nothing = err [DS "unimplemented"]
+tcTerm (TyBool) Nothing = pure (TyBool, Type)
 
-tcTerm (LitBool b) Nothing = err [DS "unimplemented"]
+tcTerm t@(LitBool b) Nothing = pure (t, TyBool)
 
-tcTerm t@(If t1 t2 t3 ann1) ann2 = err [DS "unimplemented"]
+tcTerm t@(If t1 t2 t3 ann1) ann2 = do
+  -- TODO: Do something with ann1 or ann2.
+  void $ checkType t1 TyBool
+  (_t2, resultTy) <- inferType t2
+  void $ checkType t3 resultTy
+  pure (t, resultTy)
 
 tcTerm (Let bnd) ann =   err [DS "unimplemented"]
 
