@@ -116,10 +116,28 @@ tcTerm (TyUnit) Nothing = pure (TyUnit, Type)
 
 tcTerm (LitUnit) Nothing = pure (LitUnit, TyUnit)
 
+{-
+  ----------------- Bool
+  G |- Bool => Type
+-}
 tcTerm (TyBool) Nothing = pure (TyBool, Type)
 
+{-
+  ----------------- true
+  G |- true => Bool
+
+  ------------------ false
+  G |- false => Bool
+-}
 tcTerm t@(LitBool b) Nothing = pure (t, TyBool)
 
+{-
+  G |- a <= Bool
+  G |- b => A
+  G |- c <= A
+  ---------------------------- if
+  G |- if a then b else c => A
+-}
 tcTerm t@(If t1 t2 t3 ann1) ann2 = do
   -- TODO: Do something with ann1 or ann2.
   void $ checkType t1 TyBool

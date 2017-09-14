@@ -42,3 +42,9 @@ and_commutes1 : (p : Type) -> (q : Type) -> and p q -> and q p
 -- and_commutes1 = \p. \q. \andpq. conj q p (proj2 p q andpq) (proj1 p q andpq)
 and_commutes1 = \p. \q. \andpq. conj q p TRUSTME TRUSTME
 -}
+
+-----------------------------------------------------------------------
+{-
+bad_lambda : Bool
+bad_lambda = \a. a
+-}
