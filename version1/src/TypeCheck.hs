@@ -147,11 +147,51 @@ tcTerm t@(If t1 t2 t3 ann1) ann2 = do
 
 tcTerm (Let bnd) ann =   err [DS "unimplemented"]
 
-tcTerm t@(Sigma bnd) Nothing = err [DS "unimplemented"]
+{-
+  G |- A <= Type     G, x:A |- B <= Type
+  --------------------------------------- sigma
+  G |- { x : A | B } <= Type
+-}
+tcTerm t@(Sigma bnd) Nothing = do
+  ((x, (unembed -> tyA)), tyB) <- unbind bnd
+  tyA' <- tcType tyA
+  tyB' <- extendCtx (Sig x tyA') $ tcType tyB
+  pure (Sigma (bind (x, embed tyA') tyB'), Type)
 
-tcTerm t@(Prod a b ann1) ann2 = err [DS "unimplemented"]
+{-
+  G |- a <= A      G |- b <= B { a / x }
+  -------------------------------------- pair
+  G |- (a, b) <= { x : A | B }
+-}
+tcTerm t@(Prod a b ann1) ann2 = do
+  case ann2 of
+    Just ty@(Sigma bnd) -> do
+      ((x, unembed -> tyA), tyB) <- unbind bnd
+      (a', _) <- checkType a tyA
+      (b', _) <- extendCtx (Sig x tyA) $ checkType b tyB
+      pure (Prod a' b' (Annot (Just ty)), ty)
+    _ -> err [ DS "Products must have Sigma type"
+--             , DD ty
+--             , DS "found instead"
+             ]
 
-tcTerm t@(Pcase p bnd ann1) ann2 = err [DS "unimplemented"]
+{-
+  G |- a : { x : A | B }
+  G, x : A, y : B |- b : C
+  G |- C : Type
+  -------------------------------- weak-pcase
+  G |- pcase a of (x, y) -> b : C
+-}
+tcTerm t@(Pcase p bnd ann1) ann2 = do
+--   | Pcase Term (Bind (TName, TName) Term) Annot
+  (_, pTy) <- inferType p
+  case pTy of
+    Sigma sBnd -> do
+      ((x, unembed -> tyA), tyB) <- unbind sBnd
+      ((x', y'), body) <- unbind bnd
+      (_, bodyTy) <- inferType body
+      pure (Pcase t (bind (x', y') body) (Annot ann2), bodyTy)
+    _ -> err [DS "Scrutinee of pcase must have Sigma type"]
 
 tcTerm tm (Just ty) = do
   (atm, ty') <- inferType tm
