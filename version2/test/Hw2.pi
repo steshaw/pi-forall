@@ -1,11 +1,9 @@
 module Hw2 where
 
-
 -- show that propositional equality is transitive 
 
 trans : (A:Type) -> (x:A) -> (y:A) -> (z:A) -> (x = z) -> (z = y) -> (x = y)
 trans = TRUSTME
-
 
 -- properties of booleans
 
@@ -43,8 +41,3 @@ false_eq_bool : (n : Bool) -> (m : Bool) ->
      neg (n = m) ->
      eq_bool n m = False
 false_eq_bool = \n m nnm. TRUSTME
-
-
-
-
-

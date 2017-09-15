@@ -11,22 +11,6 @@ import Parser(parseModuleFile, parseModuleImports)
 
 import Text.ParserCombinators.Parsec.Error
 
-
-#ifdef MIN_VERSION_GLASGOW_HASKELL
-#if MIN_VERSION_GLASGOW_HASKELL(7,10,3,0)
--- ghc >= 7.10.3
-#else
--- older ghc versions
-import Control.Applicative 
-#endif
-#else
--- MIN_VERSION_GLASGOW_HASKELL not even defined yet
-import Control.Applicative
-#endif
-
-
-
-
 import Control.Monad.Except
 
 import System.FilePath
@@ -38,14 +22,14 @@ import Data.List(nub,(\\))
 -- transitive dependency. It returns the list of parsed modules, with all
 -- modules appearing after its dependencies.
 getModules
-  :: (Functor m, MonadError ParseError m, MonadIO m) => 
+  :: (Functor m, MonadError ParseError m, MonadIO m) =>
      [FilePath] -> String -> m [Module]
 getModules prefixes top = do
   toParse <- gatherModules prefixes [ModuleImport top]
-  mapM reparse toParse     
+  mapM reparse toParse
 
 data ModuleInfo = ModuleInfo {
-                    modInfoName     :: MName, 
+                    modInfoName     :: MName,
                     modInfoFilename :: String,
                     modInfoImports  :: [ModuleImport]
                   }
@@ -94,6 +78,6 @@ getModuleFileName prefixes modul = do
      else return $ head files
 
 -- | Fully parse a module (not just the imports).
-reparse :: (MonadError ParseError m, MonadIO m) => 
+reparse :: (MonadError ParseError m, MonadIO m) =>
             ModuleInfo -> m Module
 reparse (ModuleInfo _ fileName _) = parseModuleFile fileName

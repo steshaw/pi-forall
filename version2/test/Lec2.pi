@@ -21,7 +21,6 @@ z1 = tt
 z2 : T False
 z2 = True
 
-
 -- To get bar and barnot to work 
 -- the typing rule for 'if' expressions must be 
 -- context-dependent. In otherwords, it should add new 
@@ -50,4 +49,3 @@ snd = \A B p. pcase p of (x1,y) -> y
 sym : (A:Type) -> (x:A) -> (y:A) -> (x = y) -> y = x
 sym = \ A x y pf .
   subst refl by pf 
-

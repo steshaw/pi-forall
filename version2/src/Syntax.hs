@@ -1,11 +1,11 @@
 {- PiForall language, OPLSS -}
 
 {-# LANGUAGE TemplateHaskell,
-             FlexibleInstances, 
-             MultiParamTypeClasses, 
-             FlexibleContexts, 
-             UndecidableInstances, 
-             ViewPatterns, 
+             FlexibleInstances,
+             MultiParamTypeClasses,
+             FlexibleContexts,
+             UndecidableInstances,
+             ViewPatterns,
              EmptyDataDecls,
              DeriveGeneric,
              DeriveDataTypeable,
@@ -41,7 +41,7 @@ import Data.Typeable (Typeable)
 import Unbound.Generics.LocallyNameless
 -- import Unbound.Generics.LocallyNameless.Unsafe (unsafeUnbind)
 import Unbound.Generics.LocallyNameless.TH (makeClosedAlpha)
-import Text.ParserCombinators.Parsec.Pos       
+import Text.ParserCombinators.Parsec.Pos
 -- import Data.Set (Set)
 -- import qualified Data.Set as S
 import Data.Maybe (fromMaybe)
@@ -50,7 +50,7 @@ import Data.Maybe (fromMaybe)
 -- * Variable names
 -----------------------------------------
 
--- | term names, use unbound library to 
+-- | term names, use unbound library to
 -- automatically generate fv, subst, alpha-eq
 type TName = Name Term
 
@@ -71,35 +71,35 @@ type DCName = String
 -- Type abbreviation for documentation
 type Type = Term
 
-data Term = 
+data Term =
    -- basic language
      Type                               -- ^ type of types
-   | Var TName                          -- ^ variables      
-   | Lam (Bind (TName, Embed Annot) Term)             
-                                        -- ^ abstraction    
-   | App Term Term                      -- ^ application    
+   | Var TName                          -- ^ variables
+   | Lam (Bind (TName, Embed Annot) Term)
+                                        -- ^ abstraction
+   | App Term Term                      -- ^ application
    | Pi (Bind (TName, Embed Term) Term) -- ^ function type
 
    -- practical matters for surface language
-   | Ann Term Term            -- ^ Annotated terms `( x : A )`   
+   | Ann Term Term            -- ^ Annotated terms `( x : A )`
    | Paren Term               -- ^ parenthesized term, useful for printing
    | Pos SourcePos Term       -- ^ marked source position, for error messages
-     
-   -- conveniences  
-   | TrustMe Annot            -- ^ an axiom 'TRUSTME', inhabits all types 
-   
-   -- unit  
+
+   -- conveniences
+   | TrustMe Annot            -- ^ an axiom 'TRUSTME', inhabits all types
+
+   -- unit
    | TyUnit                   -- ^ The type with a single inhabitant `One`
    | LitUnit                  -- ^ The inhabitant, written `tt`
-     
+
    -- homework: boolean expressions
    | TyBool                   -- ^ The type with two inhabitants
    | LitBool Bool             -- ^ True and False
    | If Term Term Term Annot  -- ^ If expression for eliminating booleans
 
-   -- homework sigma types 
+   -- homework sigma types
    | Sigma (Bind (TName, Embed Term) Term)
-     -- ^ sigma type `{ x : A | B }` 
+     -- ^ sigma type `{ x : A | B }`
    | Prod Term Term Annot
      -- ^ introduction for sigmas `( a , b )`
    | Pcase Term (Bind (TName, TName) Term) Annot
@@ -107,7 +107,7 @@ data Term =
 
    -- homework let expression
    | Let (Bind (TName, Embed Term) Term)
-     -- ^ let expression, introduces a new (potentially recursive) 
+     -- ^ let expression, introduces a new (potentially recursive)
      -- definition in the ctx
 
 
@@ -118,11 +118,11 @@ data Term =
                         -- ^ equality elimination
    | Contra Term Annot  -- ^ witness to an equality contradiction
 
-     
-     
+
+
                  deriving (Show, Generic, Typeable)
-               
--- | An 'Annot' is optional type information               
+
+-- | An 'Annot' is optional type information
 newtype Annot = Annot (Maybe Term) deriving (Show, Generic, Typeable)
 
 
@@ -132,13 +132,13 @@ newtype Annot = Annot (Maybe Term) deriving (Show, Generic, Typeable)
 -----------------------------------------
 
 -- | A Module has a name, a list of imports, a list of declarations,
---   and a set of constructor names (which affect parsing).     
+--   and a set of constructor names (which affect parsing).
 data Module = Module { moduleName         :: MName,
                        moduleImports      :: [ModuleImport],
                        moduleEntries      :: [Decl]
-                       
+
                      }
-              
+
   deriving (Show, Generic, Typeable)
 
 newtype ModuleImport = ModuleImport MName
@@ -149,16 +149,16 @@ newtype ModuleImport = ModuleImport MName
 -- | Declarations are the components of modules
 data Decl = Sig     TName  Term
            -- ^ Declaration for the type of a term
-            
-          | Def     TName  Term
-            -- ^ The definition of a particular name, must 
-            -- already have a type declaration in scope
-            
-          | RecDef TName Term 
-            -- ^ A potentially (recursive) definition of 
-            -- a particular name, must be declared 
 
-            
+          | Def     TName  Term
+            -- ^ The definition of a particular name, must
+            -- already have a type declaration in scope
+
+          | RecDef TName Term
+            -- ^ A potentially (recursive) definition of
+            -- a particular name, must be declared
+
+
   deriving (Show, Generic, Typeable)
 
 
@@ -175,7 +175,7 @@ wildcardName :: TName
 wildcardName = string2Name "_"
 
 -- | empty Annotation
-noAnn :: Annot   
+noAnn :: Annot
 noAnn = Annot Nothing
 
 -- | Partial inverse of Pos
@@ -193,8 +193,8 @@ unPosFlaky t = fromMaybe (newPos "unknown location" 0 0) (unPosDeep t)
 
 
 
-        
-                          
+
+
 -----------------
 -- * Alpha equivalence, free variables and substitution.
 ------------------
@@ -202,11 +202,11 @@ unPosFlaky t = fromMaybe (newPos "unknown location" 0 0) (unPosDeep t)
 {- We use the unbound library to mark the binding occurrences of
    variables in the syntax. That allows us to automatically derive
    functions for alpha-equivalence, free variables and substitution
-   using the template haskell directives and default class instances 
-   below. 
+   using the template haskell directives and default class instances
+   below.
 -}
 
--- Defining SourcePos abstractly means that they get ignored 
+-- Defining SourcePos abstractly means that they get ignored
 -- when comparing terms.
 -- XXX need one with aeq' that always returns true.
 $(makeClosedAlpha ''SourcePos)
@@ -222,7 +222,7 @@ $(makeClosedAlpha ''SourcePos)
 --   swaps' _ _ = id
 --   freshen' _ x = return (x, mempty)
 --   lfreshen' _ x cont = cont x mempty
-  
+
 instance Subst b SourcePos where subst _ _ = id ; substs _ = id
 
 -- Among other things, the Alpha class enables the following
@@ -231,7 +231,7 @@ instance Subst b SourcePos where subst _ _ = id ; substs _ = id
 --    fv  :: Alpha a => a -> [Name a]
 
 instance Alpha Term where
-  
+
 
 instance Alpha Annot where
     -- override default behavior so that type annotations are ignored
@@ -252,4 +252,3 @@ instance Subst Term Term where
 
 
 instance Subst Term Annot
-
