@@ -1,8 +1,6 @@
 {- PiForall language -}
 
-{-# LANGUAGE ViewPatterns,
-             FlexibleContexts,
-             CPP #-}
+{-# LANGUAGE ViewPatterns, FlexibleContexts #-}
 {-# OPTIONS_GHC -Wall -fno-warn-unused-matches #-}
 
 -- | Compare two terms for equality

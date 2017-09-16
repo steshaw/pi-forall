@@ -1,27 +1,26 @@
 module Hw2 where
 
--- show that propositional equality is transitive 
+-- show that propositional equality is transitive
 
-trans : (A:Type) -> (x:A) -> (y:A) -> (z:A) -> (x = z) -> (z = y) -> (x = y)
+trans : (A : Type) -> (x : A) -> (y : A) -> (z : A) -> (x = z) -> (z = y) -> (x = y)
 trans = TRUSTME
 
 -- properties of booleans
 
 -- an encoding of logical falsity
-void : Type 
-void = (A:Type) -> A
+void : Type
+void = (A : Type) -> A
 
 neg : Type -> Type
 neg = \ A . ( (A) -> void )
 
-not : Bool -> Bool 
+not : Bool -> Bool
 not = \ x . if x then False else True
 
 -- to be or not to be, that is the question
 
 not_not_equal : (b : Bool) -> (b = not b) -> void
 not_not_equal = TRUSTME
-
 
 not_false_then_true : (b : Bool) -> neg (b = False) -> b = True
 not_false_then_true = TRUSTME
