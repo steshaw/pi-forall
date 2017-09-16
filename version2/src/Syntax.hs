@@ -1,39 +1,14 @@
 {- PiForall language, OPLSS -}
 
-{-# LANGUAGE TemplateHaskell,
-             FlexibleInstances,
-             MultiParamTypeClasses,
-             FlexibleContexts,
-             UndecidableInstances,
-             ViewPatterns,
-             EmptyDataDecls,
-             DeriveGeneric,
-             DeriveDataTypeable,
-             CPP #-}
+{-# LANGUAGE TemplateHaskell, FlexibleInstances,
+  MultiParamTypeClasses, FlexibleContexts, UndecidableInstances,
+  ViewPatterns, EmptyDataDecls, DeriveGeneric, DeriveDataTypeable #-}
 
 {-# OPTIONS_GHC -Wall -fno-warn-unused-matches -fno-warn-orphans #-}
 
-
-
 -- | The abstract syntax of the simple dependently typed language
 -- See comment at the top of 'Parser' for the concrete syntax
-
 module Syntax where
-
-#ifdef MIN_VERSION_GLASGOW_HASKELL
-#if MIN_VERSION_GLASGOW_HASKELL(7,10,3,0)
--- ghc >= 7.10.3
-#else
--- older ghc versions, but MIN_VERSION_GLASGOW_HASKELL defined
-#endif
-#else
--- MIN_VERSION_GLASGOW_HASKELL not even defined yet (ghc <= 7.8.x)
-
--- both needed only on even earlier ghc's
--- import Control.Applicative (pure)
--- import Data.Monoid (mempty)
-#endif
-
 
 import GHC.Generics (Generic)
 import Data.Typeable (Typeable)
@@ -66,7 +41,6 @@ type DCName = String
 -----------------------------------------
 -- * Core language
 -----------------------------------------
-
 
 -- Type abbreviation for documentation
 type Type = Term
@@ -110,7 +84,6 @@ data Term =
      -- ^ let expression, introduces a new (potentially recursive)
      -- definition in the ctx
 
-
    -- propositional equality
    | TyEq Term Term     -- ^ Equality type  `a = b`
    | Refl Annot         -- ^ Proof of equality
@@ -118,14 +91,12 @@ data Term =
                         -- ^ equality elimination
    | Contra Term Annot  -- ^ witness to an equality contradiction
 
-
-
-                 deriving (Show, Generic, Typeable)
+   deriving (Show, Generic, Typeable)
 
 -- | An 'Annot' is optional type information
-newtype Annot = Annot (Maybe Term) deriving (Show, Generic, Typeable)
-
-
+newtype Annot =
+  Annot (Maybe Term)
+  deriving (Show, Generic, Typeable)
 
 -----------------------------------------
 -- * Modules and declarations
@@ -133,18 +104,14 @@ newtype Annot = Annot (Maybe Term) deriving (Show, Generic, Typeable)
 
 -- | A Module has a name, a list of imports, a list of declarations,
 --   and a set of constructor names (which affect parsing).
-data Module = Module { moduleName         :: MName,
-                       moduleImports      :: [ModuleImport],
-                       moduleEntries      :: [Decl]
-
-                     }
-
-  deriving (Show, Generic, Typeable)
+data Module = Module
+  { moduleName :: MName
+  , moduleImports :: [ModuleImport]
+  , moduleEntries :: [Decl]
+  } deriving (Show, Generic, Typeable)
 
 newtype ModuleImport = ModuleImport MName
   deriving (Show,Eq, Generic, Typeable)
-
-
 
 -- | Declarations are the components of modules
 data Decl = Sig     TName  Term
@@ -157,7 +124,6 @@ data Decl = Sig     TName  Term
           | RecDef TName Term
             -- ^ A potentially (recursive) definition of
             -- a particular name, must be declared
-
 
   deriving (Show, Generic, Typeable)
 
@@ -232,7 +198,6 @@ instance Subst b SourcePos where subst _ _ = id ; substs _ = id
 
 instance Alpha Term where
 
-
 instance Alpha Annot where
     -- override default behavior so that type annotations are ignored
     -- when comparing for alpha-equivalence
@@ -249,6 +214,5 @@ instance Alpha Annot where
 instance Subst Term Term where
   isvar (Var x) = Just (SubstName x)
   isvar _ = Nothing
-
 
 instance Subst Term Annot

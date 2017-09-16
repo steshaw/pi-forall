@@ -1,6 +1,6 @@
 {- PiForall language, OPLSS -}
 
-{-# LANGUAGE TypeSynonymInstances,ExistentialQuantification,FlexibleInstances, UndecidableInstances, ViewPatterns, DefaultSignatures, GeneralizedNewtypeDeriving, FlexibleContexts, CPP #-}
+{-# LANGUAGE TypeSynonymInstances,ExistentialQuantification,FlexibleInstances, UndecidableInstances, ViewPatterns, DefaultSignatures, GeneralizedNewtypeDeriving, FlexibleContexts #-}
 {-# OPTIONS_GHC -Wall -fno-warn-unused-matches -fno-warn-name-shadowing #-}
 
 -- | A Pretty Printer.
@@ -17,23 +17,6 @@ import Control.Monad.Reader
 import Text.PrettyPrint as PP
 import Text.ParserCombinators.Parsec.Pos (SourcePos, sourceName, sourceLine, sourceColumn)
 import Text.ParserCombinators.Parsec.Error (ParseError)
-
-
-#ifdef MIN_VERSION_GLASGOW_HASKELL
-#if MIN_VERSION_GLASGOW_HASKELL(7,10,3,0)
--- ghc >= 7.10.3
-#else
--- older ghc versions, but MIN_VERSION_GLASGOW_HASKELL defined
-#endif
-#else
--- MIN_VERSION_GLASGOW_HASKELL not even defined yet (ghc <= 7.8.x)
-import Control.Applicative (Applicative(..), (<$>), (<*>))
-#endif
-
-
-
-
-
 
 import qualified Data.Set as S
 
