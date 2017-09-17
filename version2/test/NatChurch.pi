@@ -78,7 +78,7 @@ scott_pred_test2 = refl
 -- Now write plus: with Scott encoded nats, note that you need to use recursion.
 
 scott_plus : ScottNat -> ScottNat -> ScottNat
-scott_plus = \n m. m ScottNat n (\n. scott_s n)
+scott_plus = \n m. n ScottNat m (\n. scott_s (scott_plus n m))
 
 scott_plus_test_0 : scott_plus scott_one scott_two = scott_three
 scott_plus_test_0 = refl
