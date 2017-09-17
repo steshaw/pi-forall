@@ -35,8 +35,8 @@ inferType t = tcTerm t Nothing
 -- elaborated (i.e. already checked to be a good type).
 checkType :: Term -> Type -> TcMonad (Term, Type)
 checkType tm expectedTy = do
-  nf <- whnf expectedTy
-  tcTerm tm (Just nf)
+  nfTy <- whnf expectedTy
+  tcTerm tm (Just nfTy)
 
 -- | check a term, producing an elaborated term
 -- where all of the type annotations have been filled in
@@ -44,9 +44,9 @@ checkType tm expectedTy = do
 -- an expected type (must be in whnf) in checking mode
 tcTerm :: Term -> Maybe Type -> TcMonad (Term,Type)
 
-tcTerm t@(Var x) Nothing = do
-  ty  <- lookupTy x
-  pure (t,ty)
+tcTerm t@(Var n) Nothing = do
+  ty <- lookupTy n
+  pure (t, ty)
 
 tcTerm t@(Type) Nothing = pure (t,Type)
 

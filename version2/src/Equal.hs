@@ -38,7 +38,6 @@ equate t1 t2 = if (aeq t1 t2) then return () else do
       equate tyA1 tyA2
       equate tyB1 tyB2
 
-
     (Ann at1 _, at2) -> equate at1 at2
     (at1, Ann at2 _) -> equate at1 at2
     (Paren at1, at2) -> equate at1 at2
@@ -88,8 +87,6 @@ equate t1 t2 = if (aeq t1 t2) then return () else do
 
     (Contra a1 _, Contra a2 _) -> return ()
 
-
-
     (Var x, _) -> recEquate x n2
     (_, Var x) -> recEquate x n1
     (_,_) -> tyErr n1 n2
@@ -103,8 +100,6 @@ equate t1 t2 = if (aeq t1 t2) then return () else do
          case mrd of
            Just d -> equate d n2
            Nothing -> tyErr (Var x) n2
-
-
 
 -------------------------------------------------------
 
@@ -122,8 +117,6 @@ ensurePi ty = do
 
     _ -> err [DS "Expected a function type, instead found", DD nf]
 
-
-
 -- | Ensure that the given 'ty' is an equality type
 -- (or could be normalized to be such) and return
 -- the LHS and RHS of that equality
@@ -135,10 +128,6 @@ ensureTyEq ty = do
     TyEq m n -> return (m, n)
     _ -> err [DS "Expected an equality type, instead found", DD nf]
 
-
-
-
-
 -------------------------------------------------------
 -- | Convert a term to its weak-head normal form.
 
@@ -146,7 +135,7 @@ ensureTyEq ty = do
 -- ones. But only unfold once.
 whnf :: Term -> TcMonad Term
 whnf t = do
-  whnf' False t
+  whnf' True t
 
 whnf' :: Bool -> Term -> TcMonad Term
 whnf' b (Var x) = do

@@ -137,9 +137,6 @@ lookupRecDef v = do
   ctx <- asks ctx
   return $ listToMaybe [a | RecDef v' a <- ctx, v == v']
 
-
-
-
 -- | Extend the context with a new binding.
 extendCtx :: (MonadReader Env m) => Decl -> m a -> m a
 extendCtx d =
@@ -155,8 +152,6 @@ extendCtxsGlobal :: (MonadReader Env m) => [Decl] -> m a -> m a
 extendCtxsGlobal ds =
   local (\ m@(Env {ctx = cs}) -> m { ctx     = ds ++ cs,
                                      globals = length (ds ++ cs)})
-
-
 
 -- | Extend the context with a module
 -- Note we must reverse the order.
@@ -190,7 +185,6 @@ getSourceLocation = asks sourceLocation
 -- | Add a type hint
 extendHints :: (MonadReader Env m) => Hint -> m a -> m a
 extendHints h = local (\m@(Env {hints = hs}) -> m { hints = h:hs })
-
 
 -- | An error that should be reported to the user
 data Err = Err [SourceLocation] Doc
