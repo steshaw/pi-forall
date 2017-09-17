@@ -1,11 +1,11 @@
 module Hw2 where
 
 
--- show that propositional equality is transitive 
+-- show that propositional equality is transitive
 
 trans : (A:Type) -> (x:A) -> (y:A) -> (z:A) -> (x = z) -> (z = y) -> (x = y)
-trans = \A x y z pf1 pf2 . 
-  subst pf1 by pf2 
+trans = \A x y z pf1 pf2 .
+  subst pf1 by pf2
 
 
 -- properties of booleans

@@ -3,27 +3,29 @@ module Hw2 where
 -- show that propositional equality is transitive
 
 trans : (A : Type) -> (x : A) -> (y : A) -> (z : A) -> (x = z) -> (z = y) -> (x = y)
-trans = TRUSTME
+trans = \A x y z pxz pzy. subst pxz by pzy
 
 -- properties of booleans
 
 -- an encoding of logical falsity
-void : Type
-void = (A : Type) -> A
+Void : Type
+Void = (A : Type) -> A
 
 neg : Type -> Type
-neg = \ A . ( (A) -> void )
+neg = \A. A -> Void
 
 not : Bool -> Bool
-not = \ x . if x then False else True
+not = \x. if x then False else True
 
 -- to be or not to be, that is the question
 
-not_not_equal : (b : Bool) -> (b = not b) -> void
-not_not_equal = TRUSTME
+not_not_equal : (b : Bool) -> (b = not b) -> Void
+not_not_equal = \b p.
+  if b then contra p else contra p
 
 not_false_then_true : (b : Bool) -> neg (b = False) -> b = True
-not_false_then_true = TRUSTME
+not_false_then_true = \b p.
+  if b then refl else p refl (b = True)
 
 -- showing that decidable equality is correct.
 
@@ -31,12 +33,19 @@ eq_bool : Bool -> Bool -> Bool
 eq_bool = \x y. if x then y else not y
 
 eq_true : (b1 : Bool) -> (b2 : Bool) -> eq_bool b1 b2 = True -> (b1 = b2)
-eq_true = \b1 b2 pf. TRUSTME
+eq_true = \b1 b2 pf.
+  if b1
+  then if b2 then refl else contra pf
+  else if b2 then contra pf else refl
 
-eq_false : 	(b1 : Bool) -> (b2 : Bool) -> eq_bool b1 b2 = False -> (b1 = b2) -> void
-eq_false = TRUSTME
+eq_false : (b1 : Bool) -> (b2 : Bool) -> eq_bool b1 b2 = False -> (b1 = b2) -> Void
+eq_false = \b1 b2 p1 p2.
+  if b1
+  then if b2 then contra p1 else contra p2
+  else if b2 then contra p2 else contra p1
 
-false_eq_bool : (n : Bool) -> (m : Bool) ->
-     neg (n = m) ->
-     eq_bool n m = False
-false_eq_bool = \n m nnm. TRUSTME
+false_eq_bool : (n : Bool) -> (m : Bool) -> neg (n = m) -> eq_bool n m = False
+false_eq_bool = \n m nnm.
+  if n
+  then if m then nnm refl (eq_bool n m = False) else refl
+  else if m then refl else nnm refl (eq_bool n m = False)
