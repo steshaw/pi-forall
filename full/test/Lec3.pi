@@ -88,8 +88,8 @@ threeIsBeautiful = B3
 eightIsBeautiful : Beautiful 8
 eightIsBeautiful = Bsum 3 5 B3 B5
 
-beautifulPlusEight : (n:Nat) -> Beautiful n -> Beautiful (plus 8 n)
-beautifulPlusEight = \ n bn. Bsum 8 n eightIsBeautiful bn
+beautifulPlusEight : (n : Nat) -> Beautiful n -> Beautiful (plus 8 n)
+beautifulPlusEight = \n bn. Bsum 8 n eightIsBeautiful bn
 
 data Gorgeous (n : Nat) : Type where
    G0 of [n = 0]
